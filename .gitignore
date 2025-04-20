@@ -12,7 +12,7 @@ coverage/
 
 # dotenv
 .env
-.env.*
+!.env.development
 !.env.template
 
 # Debug / temp

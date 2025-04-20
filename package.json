@@ -3,7 +3,7 @@
     "version": "0.1.0",
     "description": "CLI-інструмент для створення масштабованих веб-додатків на основі мікрофронтенд-архітектури з Module Federation",
     "bin": {
-        "mf-cli": "./bin/index.js"
+        "mf-cli": "./dist/bin/index.js"
     },
     "scripts": {
         "dev": "tsc --watch",
