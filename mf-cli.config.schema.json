@@ -1,0 +1,51 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "mf-cli.config.json schema",
+    "type": "object",
+    "properties": {
+        "appsDir": {
+            "type": "string",
+            "description": "Path to the directory where shell and microfrontends are stored (monorepo mode)."
+        },
+        "defaultShell": {
+            "type": "string",
+            "description": "Name of the default shell application."
+        },
+        "sharedApp": {
+            "type": "object",
+            "description": "Configuration for shared remote application.",
+            "properties": {
+                "name": {
+                    "type": "string",
+                    "description": "The import name used for the shared remote (e.g., 'shared' or 'core-ui')."
+                }
+            },
+            "required": ["name"]
+        },
+        "eslintConfig": {
+            "type": "string",
+            "description": "Path to a custom ESLint config to be used for generated projects."
+        },
+        "prettierConfig": {
+            "type": "string",
+            "description": "Path to a custom Prettier config to be used for generated projects."
+        },
+        "defaultStyleFramework": {
+            "type": "string",
+            "enum": ["tailwind", "bootstrap", "none"],
+            "description": "Default CSS framework to use in generated microfrontends."
+        },
+        "defaultUseSass": {
+            "type": "boolean",
+            "description": "Whether Sass/SCSS should be included by default."
+        },
+        "defaultRemotes": {
+            "type": "object",
+            "description": "Map of remote names to environment variable names.",
+            "additionalProperties": {
+                "type": "string"
+            }
+        }
+    },
+    "additionalProperties": false
+}

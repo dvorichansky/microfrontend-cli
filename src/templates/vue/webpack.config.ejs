@@ -1,0 +1,46 @@
+const path = require('path');
+const { withModuleFederation } = require('@module-federation/enhanced/webpack');
+const remotes = require('./remotes.config');
+require('dotenv').config({ path: '.env.development' });
+
+module.exports = withModuleFederation({
+  name: '<%= name %>',
+  filename: 'remoteEntry.js',
+  exposes: {
+    './App': '<%= exposesPath %>'
+  },
+  remotes,
+  shared: {
+    vue: { singleton: true, requiredVersion: false }
+  },
+  webpackConfig: {
+    entry: './src/main.ts',
+    mode: 'development',
+    devtool: 'source-map',
+    devServer: {
+      port: 3000,
+      historyApiFallback: true,
+      hot: true,
+      open: true
+    },
+    output: {
+      publicPath: 'auto'
+    },
+    resolve: {
+      extensions: ['.ts', '.tsx', '.js', '.jsx']
+    },
+    module: {
+      rules: [
+        {
+          test: /\\.tsx?$/,
+          use: 'ts-loader',
+          exclude: /node_modules/
+        },
+        {
+          test: /\\.css$/,
+          use: ['style-loader', 'css-loader']
+        }
+      ]
+    }
+  }
+});

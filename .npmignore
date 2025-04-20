@@ -1,0 +1,38 @@
+# Source code – not needed in published package
+src/
+test/
+__tests__/
+__mocks__/
+*.test.ts
+*.spec.ts
+
+# TypeScript configs and build info
+tsconfig.json
+tsconfig.*.json
+*.tsbuildinfo
+
+# Linting and formatting configs
+.eslintrc.js
+.prettierrc
+.prettier.config.js
+
+# Development tools and environment files
+.vscode/
+.idea/
+.env
+.env.*
+*.log
+*.tmp
+
+# Code coverage and testing output
+coverage/
+.nyc_output/
+
+# OS and editor generated files
+.DS_Store
+Thumbs.db
+
+# Optional documentation files (if not publishing them)
+CHANGELOG.md
+TODO.md
+notes.md

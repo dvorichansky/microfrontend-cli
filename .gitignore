@@ -1,0 +1,25 @@
+# Node
+node_modules/
+dist/
+.nyc_output/
+coverage/
+*.log
+*.tsbuildinfo
+
+# VSCode / IDE
+.vscode/
+.idea/
+
+# dotenv
+.env
+.env.*
+!.env.template
+
+# Debug / temp
+debug.log
+tmp/
+temp/
+
+# OS / system
+.DS_Store
+Thumbs.db
