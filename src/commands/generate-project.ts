@@ -3,10 +3,13 @@ import path from 'path';
 import ejs from 'ejs';
 
 import { PROJECT_STRUCTURE_KEYS, PROJECT_STYLE_FRAMEWORK_KEYS, PROJECT_TYPE_KEYS } from '../constants/project';
+import { getConfig } from '../core/config';
 
 import type { ProjectOptions } from '../types/project';
 
 export async function generateProject(options: ProjectOptions) {
+    const config = getConfig();
+
     const templatePath = path.resolve(__dirname, '..', '..', '..', 'templates', options.framework);
     const targetDir =
         options.structure === PROJECT_STRUCTURE_KEYS.standalone
@@ -14,8 +17,7 @@ export async function generateProject(options: ProjectOptions) {
             : path.resolve(process.cwd(), 'apps', options.name);
 
     const remoteKey = options.name.toUpperCase().replace(/-/g, '_') + '_REMOTE_URL';
-    const sharedName = 'shared';
-    const sharedKey = sharedName.toUpperCase().replace(/-/g, '_') + '_REMOTE_URL';
+    const sharedKey = config.sharedApp.name.toUpperCase().replace(/-/g, '_') + '_REMOTE_URL';
 
     const context = {
         ...options,
@@ -73,6 +75,12 @@ export async function generateProject(options: ProjectOptions) {
         if (await fs.pathExists(tailwindPath)) {
             await fs.copy(tailwindPath, out('tailwind.config.js'));
         }
+    }
+
+    if (options.createShared) {
+        const sharedPath = path.resolve(process.cwd(), config.sharedApp.name);
+
+        await fs.copy(path.resolve(__dirname, '..', '..', '..', 'templates', 'shared'), sharedPath);
     }
 
     return targetDir;

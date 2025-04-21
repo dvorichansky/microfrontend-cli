@@ -6,6 +6,7 @@ export type ProjectStyleFramework = keyof typeof PROJECT_STYLE_FRAMEWORKS;
 export type ProjectStructure = keyof typeof PROJECT_STRUCTURES;
 
 export type ProjectUseSass = boolean;
+export type ProjectCreateShared = boolean;
 export type ProjectAddSharedRemote = boolean;
 export type ProjectName = string;
 
@@ -15,6 +16,7 @@ export interface ProjectOptions {
     styleFramework: ProjectStyleFramework;
     useSass: ProjectUseSass;
     structure: ProjectStructure;
+    createShared: ProjectCreateShared;
     addSharedRemote: ProjectAddSharedRemote;
     type: ProjectType;
 }
