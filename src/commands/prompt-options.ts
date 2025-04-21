@@ -91,14 +91,29 @@ export async function promptForProjectOptions(commandOptions: OptionValues = {})
         checkCancel(options.type);
     }
 
-    if (commandOptions.name) {
-        options.name = commandOptions.name;
-    } else {
-        options.name = (await text({
-            message: options.type === PROJECT_TYPE_KEYS.shell ? 'Shell name:' : 'Microfrontend name:',
-            placeholder: options.type === PROJECT_TYPE_KEYS.shell ? 'shell' : 'product-list',
-        })) as ProjectName;
-        checkCancel(options.name);
+    while (!options.name) {
+        if (commandOptions.name) {
+            options.name = commandOptions.name;
+        } else {
+            options.name = (await text({
+                message: options.type === PROJECT_TYPE_KEYS.shell ? 'Shell name:' : 'Microfrontend name:',
+                placeholder: options.type === PROJECT_TYPE_KEYS.shell ? 'shell' : 'my-microfrontend',
+            })) as ProjectName;
+            checkCancel(options.name);
+        }
+
+        const targetDir =
+            options.structure === PROJECT_STRUCTURE_KEYS.standalone
+                ? path.resolve(process.cwd(), options.name)
+                : path.resolve(process.cwd(), config.appsDir, options.name);
+
+        if (!fs.existsSync(targetDir)) {
+            break;
+        }
+
+        console.log(`❌ A project with name '${options.name}' already exists. Please choose a different name.`);
+        options.name = '';
+        commandOptions.name = '';
     }
 
     if (commandOptions.framework) {
@@ -162,7 +177,7 @@ export async function promptForProjectOptions(commandOptions: OptionValues = {})
         options.createShared = false;
     }
 
-    if (options.type === PROJECT_TYPE_KEYS.microfrontend && sharedExists) {
+    if (options.type === PROJECT_TYPE_KEYS.microfrontend && (sharedExists || options.createShared)) {
         if (commandOptions.addSharedRemote) {
             options.addSharedRemote = commandOptions.addSharedRemote;
         } else {

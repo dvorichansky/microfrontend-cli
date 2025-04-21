@@ -14,7 +14,7 @@ export async function generateProject(options: ProjectOptions) {
     const targetDir =
         options.structure === PROJECT_STRUCTURE_KEYS.standalone
             ? path.resolve(process.cwd(), options.name)
-            : path.resolve(process.cwd(), 'apps', options.name);
+            : path.resolve(process.cwd(), config.appsDir, options.name);
 
     const remoteKey = options.name.toUpperCase().replace(/-/g, '_') + '_REMOTE_URL';
     const sharedKey = config.sharedApp.name.toUpperCase().replace(/-/g, '_') + '_REMOTE_URL';
