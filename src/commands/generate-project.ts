@@ -2,13 +2,16 @@ import fs from 'fs-extra';
 import path from 'path';
 import ejs from 'ejs';
 
-import { ProjectOptions } from '../types';
+import { PROJECT_STRUCTURE_KEYS, PROJECT_STYLE_FRAMEWORK_KEYS, PROJECT_TYPE_KEYS } from '../constants/project';
+
+import type { ProjectOptions } from '../types/project';
 
 export async function generateProject(options: ProjectOptions) {
-    const templatePath = path.resolve(__dirname, '..', 'templates', options.framework);
-    const targetDir = options.standalone
-        ? path.resolve(process.cwd(), options.name)
-        : path.resolve(process.cwd(), 'apps', options.name);
+    const templatePath = path.resolve(__dirname, '..', '..', '..', 'templates', options.framework);
+    const targetDir =
+        options.structure === PROJECT_STRUCTURE_KEYS.standalone
+            ? path.resolve(process.cwd(), options.name)
+            : path.resolve(process.cwd(), 'apps', options.name);
 
     const remoteKey = options.name.toUpperCase().replace(/-/g, '_') + '_REMOTE_URL';
     const sharedName = 'shared';
@@ -25,7 +28,11 @@ export async function generateProject(options: ProjectOptions) {
     const out = (...segments: string[]) => path.join(targetDir, ...segments);
 
     await fs.copy(templatePath, targetDir, {
-        filter: (src) => !src.endsWith('.ejs'),
+        filter: (src) =>
+            !src.endsWith('.ejs') &&
+            !src.endsWith('gitignore') &&
+            !src.endsWith('postcss.config.js') &&
+            !src.endsWith('tailwind.config.js'),
     });
 
     const render = async (src: string, dest: string) => {
@@ -36,18 +43,37 @@ export async function generateProject(options: ProjectOptions) {
     await Promise.all([
         render('webpack.config.ejs', 'webpack.config.js'),
         render('package.json.ejs', 'package.json'),
-        render('index.html', 'index.html'),
-        render('src/index.tsx', 'src/index.tsx'),
-        render('src/App.tsx', 'src/App.tsx'),
+        render('index.html.ejs', 'index.html'),
+        render('src/index.tsx.ejs', 'src/index.tsx'),
+        render('src/App.tsx.ejs', 'src/App.tsx'),
         render(
             `src/${options.useSass ? 'index.scss.ejs' : 'index.css.ejs'}`,
             `src/${options.useSass ? 'index.scss' : 'index.css'}`,
         ),
-        options.type === 'microfrontend'
+        options.type === PROJECT_TYPE_KEYS.microfrontend
             ? render('remotes.config.ejs', 'remotes.config.js')
             : fs.outputFile(out('remotes.config.js'), 'module.exports = {};\n'),
-        options.type === 'microfrontend' ? render('.env.development.ejs', '.env.development') : Promise.resolve(),
+        options.type === PROJECT_TYPE_KEYS.microfrontend
+            ? render('.env.development.ejs', '.env.development')
+            : Promise.resolve(),
     ]);
+
+    const gitignorePath = tpl('gitignore');
+    if (await fs.pathExists(gitignorePath)) {
+        await fs.copy(gitignorePath, out('.gitignore'));
+    }
+
+    if (options.styleFramework === PROJECT_STYLE_FRAMEWORK_KEYS.tailwind) {
+        const postcssPath = tpl('postcss.config.js');
+        if (await fs.pathExists(postcssPath)) {
+            await fs.copy(postcssPath, out('postcss.config.js'));
+        }
+
+        const tailwindPath = tpl('tailwind.config.js');
+        if (await fs.pathExists(tailwindPath)) {
+            await fs.copy(tailwindPath, out('tailwind.config.js'));
+        }
+    }
 
     return targetDir;
 }
