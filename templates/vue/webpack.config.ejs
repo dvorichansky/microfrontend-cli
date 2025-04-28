@@ -7,7 +7,7 @@ module.exports = withModuleFederation({
   name: '<%= name %>',
   filename: 'remoteEntry.js',
   exposes: {
-    './App': '<%= exposesPath %>'
+    './App': './src/App',
   },
   remotes,
   shared: {

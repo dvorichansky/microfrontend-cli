@@ -1,9 +1,12 @@
-import React from 'react';
 import { createRoot } from 'react-dom/client';
 
 import App from './App';
 
-<% if (useSass) { %>import './index.scss';<% } else { %>import './index.css';<% } %>
+<% if (useSass) { -%>
+import './index.scss';
+<% } else { -%>
+import './index.css';
+<% } -%>
 
 const container = document.getElementById('root');
 if (container) {

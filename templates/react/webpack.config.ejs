@@ -1,70 +1,98 @@
+const path = require('path');
+const fs = require('fs');
 const dotenv = require('dotenv');
-const { withModuleFederation } = require('@module-federation/enhanced/webpack');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
-<% if (type === 'shell' || addSharedRemote) { %>
-const remotes = require('./remotes.config');
-<% } %>
-dotenv.config({ path: '.env.development' });
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const webpack = require('webpack');
+const { ModuleFederationPlugin } = require('@module-federation/enhanced/webpack');
 
-module.exports = withModuleFederation({
-    name: '<%= name %>',
-    filename: 'remoteEntry.js',
-<% if (type === 'microfrontend') { -%>
-    exposes: {
-        './App': '<%= exposesPath %>'
+const mfConfig = require('./modulefederation.config.js');
+
+// Environment
+const currentEnv = process.env.NODE_ENV || 'development';
+const isDev = currentEnv === "development";
+
+// .env
+const envFile = `.env.${currentEnv}`;
+
+if (fs.existsSync(envFile)) {
+    dotenv.config({ path: envFile });
+} else {
+    console.warn(`[webpack] ${envFile} not found. Using default environment variables.`);
+}
+
+// Plugins
+const plugins = [
+    new HtmlWebpackPlugin({
+        template: './index.html',
+        filename: 'index.html',
+        minify: !isDev,
+    }),
+    new ModuleFederationPlugin(mfConfig),
+    new webpack.DefinePlugin({
+        'process.env.NODE_ENV': JSON.stringify(currentEnv),
+        'process.env.API_URL': JSON.stringify(process.env.API_URL),
+    }),
+];
+
+// Production-only: MiniCssExtractPlugin
+if (!isDev) {
+    plugins.push(
+        new MiniCssExtractPlugin({
+            filename: '[name].[contenthash].css',
+        })
+    );
+}
+
+module.exports = {
+    entry: './src/index.ts',
+    mode: currentEnv,
+    devtool: isDev ? 'source-map' : false,
+    output: {
+        path: path.resolve(__dirname, 'dist'),
+        filename: isDev ? '[name].js' : '[name].[contenthash].js',
+        publicPath: 'auto',
+        clean: true,
     },
-<% } -%>
-<% if (type === 'shell' || addSharedRemote) { -%>
-    remotes,
-<% } -%>
-    shared: {
-        react: { singleton: true, requiredVersion: false },
-        'react-dom': { singleton: true, requiredVersion: false },
+    resolve: {
+        extensions: ['.ts', '.tsx', '.js', '.jsx'],
     },
-    webpackConfig: {
-        entry: './src/index.tsx',
-        mode: 'development',
-        devtool: 'source-map',
+    module: {
+        rules: [
+            {
+                test: /\.tsx?$/,
+                use: 'ts-loader',
+                exclude: /node_modules/,
+            },
+            {
+                test: /\.css$/,
+                use: [
+                    isDev ? 'style-loader' : MiniCssExtractPlugin.loader,
+                    'css-loader',
+<% if (styleFramework === 'tailwind') { -%>
+                    'postcss-loader',
+<% } -%>
+                ],
+            },
+<% if (useSass) { -%>
+            {
+                test: /\.s[ac]ss$/,
+                use: [
+                    isDev ? 'style-loader' : MiniCssExtractPlugin.loader,
+                    'css-loader',
+                    'sass-loader',
+                ],
+            },
+<% } -%>
+        ],
+    },
+    plugins,
+    ...(isDev ? {
         devServer: {
             port: 3000,
             historyApiFallback: true,
             hot: true,
             open: true,
         },
-        output: {
-            publicPath: 'auto',
-        },
-        resolve: {
-            extensions: ['.ts', '.tsx', '.js', '.jsx'],
-        },
-        module: {
-            rules: [
-                {
-                    test: /\.tsx?$/,
-                    use: 'ts-loader',
-                    exclude: /node_modules/,
-                },
-                {
-                    test: /\.css$/,
-                    use: [
-                        'style-loader',
-                        'css-loader',
-                        <% if (styleFramework === 'tailwind') { %>'postcss-loader',<% } %>
-                    ]
-                },
-                <% if (useSass) { -%>
-                {
-                    test: /\.s[ac]ss$/,
-                    use: ['style-loader', 'css-loader', 'sass-loader'],
-                },
-                <% } -%>
-            ],
-        },
-        plugins: [
-            new HtmlWebpackPlugin({
-                template: './index.html',
-                filename: 'index.html',
-            }),
-        ],
-    }
-});
+    } : {}),
+};

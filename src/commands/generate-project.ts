@@ -1,8 +1,9 @@
 import fs from 'fs-extra';
 import path from 'path';
 import ejs from 'ejs';
+import { outro } from '@clack/prompts';
 
-import { PROJECT_STRUCTURE_KEYS, PROJECT_STYLE_FRAMEWORK_KEYS, PROJECT_TYPE_KEYS } from '../constants/project';
+import { PROJECT_STRUCTURE_KEYS, PROJECT_STYLE_FRAMEWORK_KEYS } from '../constants/project';
 import { getConfig } from '../core/config';
 
 import type { ProjectOptions } from '../types/project';
@@ -16,14 +17,15 @@ export async function generateProject(options: ProjectOptions) {
             ? path.resolve(process.cwd(), options.name)
             : path.resolve(process.cwd(), config.appsDir, options.name);
 
-    const remoteKey = options.name.toUpperCase().replace(/-/g, '_') + '_REMOTE_URL';
-    const sharedKey = config.sharedApp.name.toUpperCase().replace(/-/g, '_') + '_REMOTE_URL';
+    const remoteEntryKey = `${options.name.toUpperCase().replace(/-/g, '_')}_MANIFEST_URL`;
+    const sharedName = config.sharedApp.name;
+    const sharedRemoteEntryKey = `${sharedName.toUpperCase().replace(/-/g, '_')}_MANIFEST_URL`;
 
     const context = {
         ...options,
-        remoteKey,
-        sharedKey,
-        exposesPath: './src/App',
+        remoteEntryKey,
+        sharedRemoteEntryKey,
+        sharedName,
     };
 
     const tpl = (...segments: string[]) => path.join(templatePath, ...segments);
@@ -44,20 +46,17 @@ export async function generateProject(options: ProjectOptions) {
 
     await Promise.all([
         render('webpack.config.ejs', 'webpack.config.js'),
+        render('modulefederation.config.ejs', 'modulefederation.config.js'),
         render('package.json.ejs', 'package.json'),
         render('index.html.ejs', 'index.html'),
-        render('src/index.tsx.ejs', 'src/index.tsx'),
+        render('src/bootstrap.tsx.ejs', 'src/bootstrap.tsx'),
+        render('src/App.tsx.ejs', 'src/App.tsx'),
         render('src/App.tsx.ejs', 'src/App.tsx'),
         render(
             `src/${options.useSass ? 'index.scss.ejs' : 'index.css.ejs'}`,
             `src/${options.useSass ? 'index.scss' : 'index.css'}`,
         ),
-        options.type === PROJECT_TYPE_KEYS.microfrontend
-            ? render('remotes.config.ejs', 'remotes.config.js')
-            : fs.outputFile(out('remotes.config.js'), 'module.exports = {};\n'),
-        options.type === PROJECT_TYPE_KEYS.microfrontend
-            ? render('.env.development.ejs', '.env.development')
-            : Promise.resolve(),
+        render('.env.development.ejs', '.env.development'),
     ]);
 
     const gitignorePath = tpl('gitignore');
@@ -82,6 +81,14 @@ export async function generateProject(options: ProjectOptions) {
 
         await fs.copy(path.resolve(__dirname, '..', '..', '..', 'templates', 'shared'), sharedPath);
     }
+
+    outro(`✔️ Your '${options.name}' project is ready to go.
+
+Next steps:
+  cd ${path.relative(process.cwd(), targetDir)}
+  npm install
+  npm run dev
+`);
 
     return targetDir;
 }

@@ -33,8 +33,6 @@ program
     .action(async () => {
         const commandOptions = program.opts();
 
-        console.log(commandOptions);
-
         if (commandOptions.help) {
             program.outputHelp();
             process.exit(0);
