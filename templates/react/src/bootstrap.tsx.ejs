@@ -1,6 +1,10 @@
 import { createRoot } from 'react-dom/client';
 
+<% if (type === 'shared') { -%>
+import Button from './Button';
+<% } else { -%>
 import App from './App';
+<% } -%>
 
 <% if (useSass) { -%>
 import './index.scss';
@@ -10,8 +14,17 @@ import './index.css';
 
 const container = document.getElementById('root');
 if (container) {
-  const root = createRoot(container);
-  root.render(<App />);
+    const root = createRoot(container);
+<% if (type === 'shared') { -%>
+    root.render(
+        <div style={{ padding: 24 }}>
+            <h2>Shared Component Preview:</h2>
+            <Button />
+        </div>
+    );
+<% } else { -%>
+    root.render(<App />);
+<% } -%>
 } else {
-  console.error("Root element not found");
+    console.error("Root element not found");
 }

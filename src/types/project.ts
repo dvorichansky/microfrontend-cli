@@ -10,6 +10,7 @@ export type ProjectUseSass = boolean;
 // export type ProjectAddSharedRemote = boolean;
 export type ProjectIncludeESLint = boolean;
 export type ProjectName = string;
+export type ProjectPort = string;
 
 export interface ProjectOptions {
     name: ProjectName;
@@ -21,6 +22,7 @@ export interface ProjectOptions {
     // addSharedRemote: ProjectAddSharedRemote;
     includeESLint: ProjectIncludeESLint;
     type: ProjectType;
+    port: ProjectPort;
 }
 
 export interface ProjectCommandOptions {
@@ -32,6 +34,7 @@ export interface ProjectCommandOptions {
     useSass?: ProjectUseSass;
     // createShared?: ProjectCreateShared;
     // addSharedRemote?: ProjectAddSharedRemote;
+    port?: ProjectPort;
     noEslint?: ProjectIncludeESLint;
     help?: boolean;
 }

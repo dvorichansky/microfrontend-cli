@@ -2,15 +2,21 @@ const { dependencies } = require('./package.json');
 
 module.exports = {
     name: '<%= name %>',
-<% if (type === 'microfrontend') { -%>
+<% if (type === 'microfrontend' || type === 'shared') { -%>
     exposes: {
+<% if (type === 'microfrontend') { -%>
         './App': './src/App',
+<% } else if (type === 'shared') { -%>
+        './Button': './src/Button',
+<% } -%>
     },
     filename: 'remoteEntry.js',
 <% } -%>
+<% if (type === 'shell') { -%>
     remotes: {
-        // shared: 'shared@http://localhost:4000/remoteEntry.js',
+        // 'shared-app': 'shared_app@http://localhost:4000/remoteEntry.js',
     },
+<% } -%>
     shared: {
         ...dependencies,
         react: {

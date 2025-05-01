@@ -22,11 +22,13 @@ import type {
     ProjectIncludeESLint,
     ProjectName,
     ProjectOptions,
+    ProjectPort,
     ProjectStructure,
     ProjectStyleFramework,
     ProjectType,
     ProjectUseSass,
 } from '../types/project';
+import { getNextAvailablePort, isPortAlreadyUsedInProject } from '../helpers/port';
 
 function checkCancel(value: unknown) {
     if (isCancel(value)) {
@@ -100,9 +102,16 @@ export async function promptForProjectOptions(commandOptions: ProjectCommandOpti
         if (commandOptions.name) {
             options.name = commandOptions.name;
         } else {
+            const namePrompts = {
+                [PROJECT_TYPE_KEYS.shell]: { message: 'Shell name:', placeholder: 'shell' },
+                [PROJECT_TYPE_KEYS.microfrontend]: { message: 'Microfrontend name:', placeholder: 'my-microfrontend' },
+                [PROJECT_TYPE_KEYS.shared]: { message: 'Shared remote name:', placeholder: 'shared' },
+            };
+            const namePrompt = namePrompts[options.type];
+
             options.name = (await text({
-                message: options.type === PROJECT_TYPE_KEYS.shell ? 'Shell name:' : 'Microfrontend name:',
-                placeholder: options.type === PROJECT_TYPE_KEYS.shell ? 'shell' : 'my-microfrontend',
+                message: namePrompt.message,
+                placeholder: namePrompt.placeholder,
             })) as ProjectName;
             checkCancel(options.name);
         }
@@ -174,6 +183,33 @@ export async function promptForProjectOptions(commandOptions: ProjectCommandOpti
         }
     } else {
         options.useSass = false;
+    }
+
+    while (!options.port) {
+        const rootDir =
+            options.structure === PROJECT_STRUCTURE_KEYS.standalone
+                ? path.resolve(process.cwd())
+                : path.resolve(process.cwd(), config.appsDir);
+
+        if (commandOptions.port) {
+            options.port = commandOptions.port;
+        } else {
+            const availablePort = (await getNextAvailablePort(rootDir)).toString();
+
+            options.port = (await text({
+                message: 'Port number:',
+                initialValue: availablePort,
+            })) as ProjectPort;
+            checkCancel(options.port);
+        }
+
+        if (!(await isPortAlreadyUsedInProject(rootDir, parseInt(options.port, 10)))) {
+            break;
+        }
+
+        console.log(`❌ Port ${options.port} is already in use. Please choose a different port.`);
+        options.port = '';
+        commandOptions.port = '';
     }
 
     if (commandOptions.noEslint) {

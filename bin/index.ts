@@ -31,6 +31,7 @@ program
     .option('-sass, --use-sass', 'Use SASS')
     // .option('-shared, --create-shared', 'Create a shared app')
     // .option('-add-shared-remote, --add-shared-remote', 'Add a remote for the shared app')
+    .option('-p, --port <port>', 'Port number')
     .option('-no-eslint, --no-eslint', 'Without ESLint')
     .option('-h, --help', 'Display help for command')
     .action(async () => {

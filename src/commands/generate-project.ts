@@ -3,7 +3,7 @@ import path from 'path';
 import ejs from 'ejs';
 import { outro } from '@clack/prompts';
 
-import { PROJECT_STRUCTURE_KEYS, PROJECT_STYLE_FRAMEWORK_KEYS } from '../constants/project';
+import { PROJECT_STRUCTURE_KEYS, PROJECT_STYLE_FRAMEWORK_KEYS, PROJECT_TYPE_KEYS } from '../constants/project';
 import { getConfig } from '../core/config';
 
 import type { ProjectOptions } from '../types/project';
@@ -55,14 +55,19 @@ export async function generateProject(options: ProjectOptions) {
         render('package.json.ejs', 'package.json'),
         render('index.html.ejs', 'index.html'),
         render('src/bootstrap.tsx.ejs', 'src/bootstrap.tsx'),
-        render('src/App.tsx.ejs', 'src/App.tsx'),
-        render('src/App.tsx.ejs', 'src/App.tsx'),
+
         render(
             `src/${options.useSass ? 'index.scss.ejs' : 'index.css.ejs'}`,
             `src/${options.useSass ? 'index.scss' : 'index.css'}`,
         ),
         render('.env.development.ejs', '.env.development'),
     ]);
+
+    if (options.type === PROJECT_TYPE_KEYS.shared) {
+        await render('src/Button.tsx.ejs', 'src/Button.tsx');
+    } else {
+        await render('src/App.tsx.ejs', 'src/App.tsx');
+    }
 
     const gitignorePath = tpl('gitignore');
     if (await fs.pathExists(gitignorePath)) {

@@ -1,6 +1,7 @@
 export const PROJECT_TYPE_KEYS = {
     shell: 'shell',
     microfrontend: 'microfrontend',
+    shared: 'shared',
 } as const;
 
 export const PROJECT_FRAMEWORK_KEYS = {
@@ -22,7 +23,8 @@ export const PROJECT_STRUCTURE_KEYS = {
 
 export const PROJECT_TYPES = {
     [PROJECT_TYPE_KEYS.shell]: 'Shell (host application)',
-    [PROJECT_TYPE_KEYS.microfrontend]: 'Microfrontend (remote)',
+    [PROJECT_TYPE_KEYS.microfrontend]: 'Microfrontend (UI)',
+    [PROJECT_TYPE_KEYS.shared]: 'Shared remote (UI libs / utils)',
 } as const;
 
 export const PROJECT_FRAMEWORKS = {
