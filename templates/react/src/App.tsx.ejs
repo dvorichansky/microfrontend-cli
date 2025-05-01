@@ -1,6 +1,6 @@
 const App = () => {
   return (
-    <div className="app">
+    <div className="<% if (styleFramework === 'tailwind') { %>text-3xl text-center mt-10<% } else { %>app<% } %>">
       <h1>Hello from <%= name %></h1>
     </div>
   );

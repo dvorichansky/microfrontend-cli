@@ -17,15 +17,20 @@ export async function generateProject(options: ProjectOptions) {
             ? path.resolve(process.cwd(), options.name)
             : path.resolve(process.cwd(), config.appsDir, options.name);
 
-    const remoteEntryKey = `${options.name.toUpperCase().replace(/-/g, '_')}_MANIFEST_URL`;
+    // const remoteEntryKey = `${options.name.toUpperCase().replace(/-/g, '_')}_REMOTE_URL`;
     const sharedName = config.sharedApp.name;
-    const sharedRemoteEntryKey = `${sharedName.toUpperCase().replace(/-/g, '_')}_MANIFEST_URL`;
+    const sharedRemoteEntryKey = `${sharedName.toUpperCase().replace(/-/g, '_')}_REMOTE_URL`;
+
+    const eslintRelativeExtendPath = config.eslintExtendPath
+        ? path.relative(targetDir, path.resolve(process.cwd(), config.eslintExtendPath)).replace(/\\/g, '/')
+        : null;
 
     const context = {
         ...options,
-        remoteEntryKey,
+        // remoteEntryKey,
         sharedRemoteEntryKey,
         sharedName,
+        eslintRelativeExtendPath,
     };
 
     const tpl = (...segments: string[]) => path.join(templatePath, ...segments);
@@ -76,11 +81,21 @@ export async function generateProject(options: ProjectOptions) {
         }
     }
 
-    if (options.createShared) {
-        const sharedPath = path.resolve(process.cwd(), config.sharedApp.name);
+    if (options.includeESLint) {
+        if (config.eslintTemplatePath) {
+            const sourcePath = path.resolve(process.cwd(), config.eslintTemplatePath);
 
-        await fs.copy(path.resolve(__dirname, '..', '..', '..', 'templates', 'shared'), sharedPath);
+            await fs.copy(sourcePath, path.join(targetDir, '.eslintrc.js'));
+        } else {
+            await render('.eslintrc.ejs', '.eslintrc.js');
+        }
     }
+
+    // if (options.createShared) {
+    //     const sharedPath = path.resolve(process.cwd(), config.sharedApp.name);
+
+    //     await fs.copy(path.resolve(__dirname, '..', '..', '..', 'templates', 'shared'), sharedPath);
+    // }
 
     outro(`✔️ Your '${options.name}' project is ready to go.
 

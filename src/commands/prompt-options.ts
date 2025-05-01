@@ -2,8 +2,6 @@ import { text, select, confirm, isCancel, cancel } from '@clack/prompts';
 import fs from 'fs';
 import path from 'path';
 
-import type { OptionValues } from 'commander';
-
 import { getConfig } from '../core/config';
 import {
     PROJECT_FRAMEWORK_KEYS,
@@ -17,9 +15,11 @@ import {
 } from '../constants/project';
 
 import type {
-    ProjectAddSharedRemote,
-    ProjectCreateShared,
+    ProjectCommandOptions,
+    // ProjectAddSharedRemote,
+    // ProjectCreateShared,
     ProjectFramework,
+    ProjectIncludeESLint,
     ProjectName,
     ProjectOptions,
     ProjectStructure,
@@ -35,12 +35,12 @@ function checkCancel(value: unknown) {
     }
 }
 
-export async function promptForProjectOptions(commandOptions: OptionValues = {}): Promise<ProjectOptions> {
+export async function promptForProjectOptions(commandOptions: ProjectCommandOptions = {}): Promise<ProjectOptions> {
     const config = getConfig();
     const options = {} as ProjectOptions;
 
     if (commandOptions.structure) {
-        if (!PROJECT_STRUCTURE_KEYS[commandOptions.structure as ProjectStructure]) {
+        if (!PROJECT_STRUCTURE_KEYS[commandOptions.structure]) {
             console.error(`Invalid structure: ${commandOptions.structure}`);
             process.exit(1);
         }
@@ -53,6 +53,10 @@ export async function promptForProjectOptions(commandOptions: OptionValues = {})
                 value,
                 label: label.replace('apps/', `${config.appsDir}/`),
             })),
+            initialValue:
+                config.defaultStructure && PROJECT_STRUCTURE_KEYS[config.defaultStructure]
+                    ? config.defaultStructure
+                    : undefined,
         })) as ProjectStructure;
         checkCancel(options.structure);
     }
@@ -74,7 +78,7 @@ export async function promptForProjectOptions(commandOptions: OptionValues = {})
     //     })) as ProjectType;
     // }
     if (commandOptions.type) {
-        if (!PROJECT_TYPE_KEYS[commandOptions.type as ProjectType]) {
+        if (!PROJECT_TYPE_KEYS[commandOptions.type]) {
             console.error(`Invalid type: ${commandOptions.type}`);
             process.exit(1);
         }
@@ -87,6 +91,7 @@ export async function promptForProjectOptions(commandOptions: OptionValues = {})
                 value,
                 label,
             })),
+            initialValue: config.defaultType && PROJECT_TYPE_KEYS[config.defaultType] ? config.defaultType : undefined,
         })) as ProjectType;
         checkCancel(options.type);
     }
@@ -117,7 +122,7 @@ export async function promptForProjectOptions(commandOptions: OptionValues = {})
     }
 
     if (commandOptions.framework) {
-        if (!PROJECT_FRAMEWORK_KEYS[commandOptions.framework as ProjectFramework]) {
+        if (!PROJECT_FRAMEWORK_KEYS[commandOptions.framework]) {
             console.error(`Invalid framework: ${commandOptions.framework}`);
             process.exit(1);
         }
@@ -130,12 +135,16 @@ export async function promptForProjectOptions(commandOptions: OptionValues = {})
                 value,
                 label,
             })),
+            initialValue:
+                config.defaultFramework && PROJECT_FRAMEWORKS[config.defaultFramework]
+                    ? config.defaultFramework
+                    : undefined,
         })) as ProjectFramework;
         checkCancel(options.framework);
     }
 
     if (commandOptions.styleFramework) {
-        if (!PROJECT_STYLE_FRAMEWORK_KEYS[commandOptions.styleFramework as ProjectStyleFramework]) {
+        if (!PROJECT_STYLE_FRAMEWORK_KEYS[commandOptions.styleFramework]) {
             console.error(`Invalid style framework: ${commandOptions.styleFramework}`);
             process.exit(1);
         }
@@ -148,6 +157,10 @@ export async function promptForProjectOptions(commandOptions: OptionValues = {})
                 value,
                 label,
             })),
+            initialValue:
+                config.defaultStyleFramework && PROJECT_STYLE_FRAMEWORKS[config.defaultStyleFramework]
+                    ? config.defaultStyleFramework
+                    : undefined,
         })) as ProjectStyleFramework;
         checkCancel(options.styleFramework);
     }
@@ -163,32 +176,42 @@ export async function promptForProjectOptions(commandOptions: OptionValues = {})
         options.useSass = false;
     }
 
-    const sharedExists = fs.existsSync(path.join(process.cwd(), config.sharedApp.name));
-    if (!sharedExists) {
-        if (commandOptions.createShared) {
-            options.createShared = commandOptions.createShared;
-        } else {
-            options.createShared = (await confirm({
-                message: `Create shared app '${config.sharedApp.name}'?`,
-            })) as ProjectCreateShared;
-            checkCancel(options.createShared);
-        }
+    if (commandOptions.noEslint) {
+        options.includeESLint = false;
     } else {
-        options.createShared = false;
+        options.includeESLint = (await confirm({
+            message: 'Include ESLint configuration?',
+            initialValue: true,
+        })) as ProjectIncludeESLint;
+        checkCancel(options.includeESLint);
     }
 
-    if (options.type === PROJECT_TYPE_KEYS.microfrontend && (sharedExists || options.createShared)) {
-        if (commandOptions.addSharedRemote) {
-            options.addSharedRemote = commandOptions.addSharedRemote;
-        } else {
-            options.addSharedRemote = (await confirm({
-                message: `Add shared remote '${config.sharedApp.name}'?`,
-            })) as ProjectAddSharedRemote;
-            checkCancel(options.addSharedRemote);
-        }
-    } else {
-        options.addSharedRemote = false;
-    }
+    // const sharedExists = fs.existsSync(path.join(process.cwd(), config.sharedApp.name));
+    // if (!sharedExists) {
+    //     if (commandOptions.createShared) {
+    //         options.createShared = commandOptions.createShared;
+    //     } else {
+    //         options.createShared = (await confirm({
+    //             message: `Create shared app '${config.sharedApp.name}'?`,
+    //         })) as ProjectCreateShared;
+    //         checkCancel(options.createShared);
+    //     }
+    // } else {
+    //     options.createShared = false;
+    // }
+
+    // if (sharedExists || options.createShared) {
+    //     if (commandOptions.addSharedRemote) {
+    //         options.addSharedRemote = commandOptions.addSharedRemote;
+    //     } else {
+    //         options.addSharedRemote = (await confirm({
+    //             message: `Add shared remote '${config.sharedApp.name}'?`,
+    //         })) as ProjectAddSharedRemote;
+    //         checkCancel(options.addSharedRemote);
+    //     }
+    // } else {
+    //     options.addSharedRemote = false;
+    // }
 
     return options;
 }

@@ -1,17 +1,18 @@
 <% if (styleFramework === 'tailwind') { -%>
-@tailwind base;
-@tailwind components;
-@tailwind utilities;
+@import "tailwindcss";
+
 <% } else if (styleFramework === 'bootstrap') { -%>
 @import 'bootstrap/dist/css/bootstrap.min.css';
-<% } -%>
 
+<% } -%>
 body {
     margin: 0;
     font-family: sans-serif;
 }
+<% if (styleFramework !== 'tailwind') { -%>
 
 .app {
     padding: 2rem;
     text-align: center;
 }
+<% } -%>

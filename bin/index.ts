@@ -11,6 +11,8 @@ import {
     PROJECT_TYPE_KEYS,
 } from '../src/constants/project';
 
+import type { ProjectCommandOptions } from '../src/types/project';
+
 const program = new Command();
 
 program.name('mf-cli').description('CLI for scalable microfrontend architecture');
@@ -27,11 +29,12 @@ program
         `Style framework to use (${Object.values(PROJECT_STYLE_FRAMEWORK_KEYS).join(', ')})`,
     )
     .option('-sass, --use-sass', 'Use SASS')
-    .option('-shared, --create-shared', 'Create a shared app')
-    .option('-add-shared-remote, --add-shared-remote', 'Add a remote for the shared app')
+    // .option('-shared, --create-shared', 'Create a shared app')
+    // .option('-add-shared-remote, --add-shared-remote', 'Add a remote for the shared app')
+    .option('-no-eslint, --no-eslint', 'Without ESLint')
     .option('-h, --help', 'Display help for command')
     .action(async () => {
-        const commandOptions = program.opts();
+        const commandOptions = program.opts() as ProjectCommandOptions;
 
         if (commandOptions.help) {
             program.outputHelp();

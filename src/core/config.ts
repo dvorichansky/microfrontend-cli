@@ -1,15 +1,17 @@
 import fs from 'fs';
 import path from 'path';
 
-const DEFAULT_CONFIG = {
+import type { ProjectConfig } from '../types/project';
+
+const DEFAULT_CONFIG: ProjectConfig = {
     appsDir: 'apps',
-    defaultShell: 'shell',
+    // defaultShell: 'shell',
     sharedApp: {
         name: 'shared',
     },
 };
 
-export function getConfig(): typeof DEFAULT_CONFIG & Record<string, any> {
+export function getConfig(): ProjectConfig {
     const configPath = path.resolve(process.cwd(), 'mf-cli.config.json');
 
     if (fs.existsSync(configPath)) {
