@@ -5,6 +5,7 @@ import { outro } from '@clack/prompts';
 
 import { PROJECT_STRUCTURE_KEYS, PROJECT_STYLE_FRAMEWORK_KEYS, PROJECT_TYPE_KEYS } from '../constants/project';
 import { getConfig } from '../core/config';
+import { updateRemotesConfig } from '../helpers/projects';
 
 import type { ProjectOptions } from '../types/project';
 
@@ -12,6 +13,10 @@ export async function generateProject(options: ProjectOptions) {
     const config = getConfig();
 
     const templatePath = path.resolve(__dirname, '..', '..', '..', 'templates', options.framework);
+    const rootDir =
+        options.structure === PROJECT_STRUCTURE_KEYS.standalone
+            ? path.resolve(process.cwd())
+            : path.resolve(process.cwd(), config.appsDir);
     const targetDir =
         options.structure === PROJECT_STRUCTURE_KEYS.standalone
             ? path.resolve(process.cwd(), options.name)
@@ -63,6 +68,13 @@ export async function generateProject(options: ProjectOptions) {
         render('.env.development.ejs', '.env.development'),
     ]);
 
+    if (options.type === PROJECT_TYPE_KEYS.microfrontend || options.type === PROJECT_TYPE_KEYS.shell) {
+        const remotesPath = tpl('remotes.config.js');
+        if (await fs.pathExists(remotesPath)) {
+            await fs.copy(remotesPath, out('remotes.config.js'));
+        }
+    }
+
     if (options.type === PROJECT_TYPE_KEYS.shared) {
         await render('src/Button.tsx.ejs', 'src/Button.tsx');
     } else {
@@ -93,6 +105,12 @@ export async function generateProject(options: ProjectOptions) {
             await fs.copy(sourcePath, path.join(targetDir, '.eslintrc.js'));
         } else {
             await render('.eslintrc.ejs', '.eslintrc.js');
+        }
+    }
+
+    if (options.consumers?.length) {
+        for (const consumer of options.consumers) {
+            await updateRemotesConfig(path.resolve(rootDir, consumer), options.name, Number(options.port));
         }
     }
 

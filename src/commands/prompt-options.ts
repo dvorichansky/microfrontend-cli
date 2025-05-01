@@ -1,4 +1,4 @@
-import { text, select, confirm, isCancel, cancel } from '@clack/prompts';
+import { text, select, confirm, isCancel, cancel, multiselect } from '@clack/prompts';
 import fs from 'fs';
 import path from 'path';
 
@@ -16,6 +16,7 @@ import {
 
 import type {
     ProjectCommandOptions,
+    ProjectConsumers,
     // ProjectAddSharedRemote,
     // ProjectCreateShared,
     ProjectFramework,
@@ -29,6 +30,7 @@ import type {
     ProjectUseSass,
 } from '../types/project';
 import { getNextAvailablePort, isPortAlreadyUsedInProject } from '../helpers/port';
+import { getProjectsWithRemotes } from '../helpers/projects';
 
 function checkCancel(value: unknown) {
     if (isCancel(value)) {
@@ -130,6 +132,24 @@ export async function promptForProjectOptions(commandOptions: ProjectCommandOpti
         commandOptions.name = '';
     }
 
+    const rootDir =
+        options.structure === PROJECT_STRUCTURE_KEYS.standalone
+            ? path.resolve(process.cwd())
+            : path.resolve(process.cwd(), config.appsDir);
+
+    if (options.type !== PROJECT_TYPE_KEYS.shell) {
+        const projectsWithRemotes = await getProjectsWithRemotes(rootDir);
+
+        if (projectsWithRemotes.length) {
+            options.consumers = (await multiselect({
+                message: 'Connect this remote to which apps?',
+                options: projectsWithRemotes.map((name) => ({ value: name, label: name })),
+                required: false,
+            })) as ProjectConsumers;
+            checkCancel(options.consumers);
+        }
+    }
+
     if (commandOptions.framework) {
         if (!PROJECT_FRAMEWORK_KEYS[commandOptions.framework]) {
             console.error(`Invalid framework: ${commandOptions.framework}`);
@@ -186,11 +206,6 @@ export async function promptForProjectOptions(commandOptions: ProjectCommandOpti
     }
 
     while (!options.port) {
-        const rootDir =
-            options.structure === PROJECT_STRUCTURE_KEYS.standalone
-                ? path.resolve(process.cwd())
-                : path.resolve(process.cwd(), config.appsDir);
-
         if (commandOptions.port) {
             options.port = commandOptions.port;
         } else {

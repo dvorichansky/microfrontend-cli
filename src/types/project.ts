@@ -11,6 +11,7 @@ export type ProjectUseSass = boolean;
 export type ProjectIncludeESLint = boolean;
 export type ProjectName = string;
 export type ProjectPort = string;
+export type ProjectConsumers = string[];
 
 export interface ProjectOptions {
     name: ProjectName;
@@ -23,6 +24,7 @@ export interface ProjectOptions {
     includeESLint: ProjectIncludeESLint;
     type: ProjectType;
     port: ProjectPort;
+    consumers: ProjectConsumers;
 }
 
 export interface ProjectCommandOptions {

@@ -1,4 +1,7 @@
 const { dependencies } = require('./package.json');
+<% if (type === 'shell' || type === 'microfrontend') { -%>
+const remotes = require('./remotes.config.js');
+<% } -%>
 
 module.exports = {
     name: '<%= name %>',
@@ -12,10 +15,8 @@ module.exports = {
     },
     filename: 'remoteEntry.js',
 <% } -%>
-<% if (type === 'shell') { -%>
-    remotes: {
-        // 'shared-app': 'shared_app@http://localhost:4000/remoteEntry.js',
-    },
+<% if (type === 'shell' || type === 'microfrontend') { -%>
+    remotes,
 <% } -%>
     shared: {
         ...dependencies,
