@@ -4,7 +4,7 @@ import ejs from 'ejs';
 import { outro } from '@clack/prompts';
 
 import { PROJECT_STRUCTURE_KEYS, PROJECT_STYLE_FRAMEWORK_KEYS, PROJECT_TYPE_KEYS } from '../constants/project';
-import { getConfig } from '../core/config';
+import { getConfig } from '../helpers/config';
 import { updateRemotesConfig } from '../helpers/projects';
 
 import type { ProjectOptions } from '../types/project';

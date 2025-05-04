@@ -2,7 +2,7 @@ import { text, select, confirm, isCancel, cancel, multiselect } from '@clack/pro
 import fs from 'fs';
 import path from 'path';
 
-import { getConfig } from '../core/config';
+import { getConfig } from '../helpers/config';
 import {
     PROJECT_FRAMEWORK_KEYS,
     PROJECT_FRAMEWORKS,

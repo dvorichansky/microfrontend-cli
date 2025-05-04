@@ -32,10 +32,10 @@ export async function updateRemotesConfig(consumerPath: string, remoteKey: strin
     }
 
     const content = await fs.readFile(configPath, 'utf-8');
+    const lowerRemoteKey = remoteKey.toLowerCase();
+    const newLine = `    '${lowerRemoteKey}': '${lowerRemoteKey}@http://localhost:${port}/remoteEntry.js',`;
 
-    const newLine = `    '${remoteKey.toLowerCase()}': '${remoteKey.toLowerCase()}@http://localhost:${port}/remoteEntry.js',`;
-
-    if (!content.includes(remoteKey.toLowerCase())) {
+    if (!content.includes(lowerRemoteKey)) {
         const updated = content.replace(/module\.exports\s*=\s*{/, `module.exports = {\n${newLine}`);
 
         await fs.writeFile(configPath, updated);
