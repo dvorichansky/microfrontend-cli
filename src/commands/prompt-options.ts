@@ -2,7 +2,6 @@ import { text, select, confirm, isCancel, cancel, multiselect } from '@clack/pro
 import fs from 'fs';
 import path from 'path';
 
-import { getConfig } from '../helpers/config';
 import {
     PROJECT_FRAMEWORK_KEYS,
     PROJECT_FRAMEWORKS,
@@ -13,12 +12,15 @@ import {
     PROJECT_TYPE_KEYS,
     PROJECT_TYPES,
 } from '../constants/project';
+import { MIDDLEWARE_STAGE } from '../constants/middleware';
+import { getConfig } from '../helpers/config';
+import { getNextAvailablePort, isPortAlreadyUsedInProject } from '../helpers/port';
+import { getProjectsWithRemotes } from '../helpers/projects';
+import { runMiddleware } from '../helpers/middleware';
 
 import type {
     ProjectCommandOptions,
     ProjectConsumers,
-    // ProjectAddSharedRemote,
-    // ProjectCreateShared,
     ProjectFramework,
     ProjectIncludeESLint,
     ProjectName,
@@ -29,8 +31,6 @@ import type {
     ProjectType,
     ProjectUseSass,
 } from '../types/project';
-import { getNextAvailablePort, isPortAlreadyUsedInProject } from '../helpers/port';
-import { getProjectsWithRemotes } from '../helpers/projects';
 
 function checkCancel(value: unknown) {
     if (isCancel(value)) {
@@ -65,22 +65,6 @@ export async function promptForProjectOptions(commandOptions: ProjectCommandOpti
         checkCancel(options.structure);
     }
 
-    // const shellPath =
-    //     structure === PROJECT_STRUCTURE_KEYS.monorepo
-    //         ? path.join(process.cwd(), config.appsDir, config.defaultShell)
-    //         : path.join(process.cwd(), config.defaultShell);
-    // const shellExists = fs.existsSync(shellPath);
-
-    // let type: ProjectType = PROJECT_TYPE_KEYS.microfrontend;
-    // if (!shellExists || commandOptions?.allowMultipleShells) {
-    //     type = (await select({
-    //         message: 'What do you want to create?' + ' ' + shellPath,
-    //         options: Object.entries(PROJECT_TYPES).map(([value, label]) => ({
-    //             value,
-    //             label,
-    //         })),
-    //     })) as ProjectType;
-    // }
     if (commandOptions.type) {
         if (!PROJECT_TYPE_KEYS[commandOptions.type]) {
             console.error(`Invalid type: ${commandOptions.type}`);
@@ -237,32 +221,9 @@ export async function promptForProjectOptions(commandOptions: ProjectCommandOpti
         checkCancel(options.includeESLint);
     }
 
-    // const sharedExists = fs.existsSync(path.join(process.cwd(), config.sharedApp.name));
-    // if (!sharedExists) {
-    //     if (commandOptions.createShared) {
-    //         options.createShared = commandOptions.createShared;
-    //     } else {
-    //         options.createShared = (await confirm({
-    //             message: `Create shared app '${config.sharedApp.name}'?`,
-    //         })) as ProjectCreateShared;
-    //         checkCancel(options.createShared);
-    //     }
-    // } else {
-    //     options.createShared = false;
-    // }
+    const middlewareOptions = await runMiddleware(MIDDLEWARE_STAGE.beforeGenerate, { options, commandOptions });
 
-    // if (sharedExists || options.createShared) {
-    //     if (commandOptions.addSharedRemote) {
-    //         options.addSharedRemote = commandOptions.addSharedRemote;
-    //     } else {
-    //         options.addSharedRemote = (await confirm({
-    //             message: `Add shared remote '${config.sharedApp.name}'?`,
-    //         })) as ProjectAddSharedRemote;
-    //         checkCancel(options.addSharedRemote);
-    //     }
-    // } else {
-    //     options.addSharedRemote = false;
-    // }
+    Object.assign(options, middlewareOptions);
 
     return options;
 }

@@ -1,7 +1,0 @@
-import type { FC } from 'react';
-
-const Button: FC = ({ children }) => {
-    return <button style={{ padding: '10px 16px', backgroundColor: '#3366ff', color: '#fff' }}>{children}</button>;
-};
-
-export default Button;

@@ -5,10 +5,6 @@ import type { ProjectConfig } from '../types/project';
 
 const DEFAULT_CONFIG: ProjectConfig = {
     appsDir: 'apps',
-    // defaultShell: 'shell',
-    sharedApp: {
-        name: 'shared',
-    },
 };
 
 export function getConfig(): ProjectConfig {

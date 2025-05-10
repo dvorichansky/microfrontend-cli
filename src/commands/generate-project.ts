@@ -4,8 +4,10 @@ import ejs from 'ejs';
 import { outro } from '@clack/prompts';
 
 import { PROJECT_STRUCTURE_KEYS, PROJECT_STYLE_FRAMEWORK_KEYS, PROJECT_TYPE_KEYS } from '../constants/project';
+import { MIDDLEWARE_STAGE } from '../constants/middleware';
 import { getConfig } from '../helpers/config';
 import { updateRemotesConfig } from '../helpers/projects';
+import { runMiddleware } from '../helpers/middleware';
 
 import type { ProjectOptions } from '../types/project';
 
@@ -23,8 +25,6 @@ export async function generateProject(options: ProjectOptions) {
             : path.resolve(process.cwd(), config.appsDir, options.name);
 
     // const remoteEntryKey = `${options.name.toUpperCase().replace(/-/g, '_')}_REMOTE_URL`;
-    const sharedName = config.sharedApp.name;
-    const sharedRemoteEntryKey = `${sharedName.toUpperCase().replace(/-/g, '_')}_REMOTE_URL`;
 
     const eslintRelativeExtendPath = config.eslintExtendPath
         ? path.relative(targetDir, path.resolve(process.cwd(), config.eslintExtendPath)).replace(/\\/g, '/')
@@ -33,8 +33,6 @@ export async function generateProject(options: ProjectOptions) {
     const context = {
         ...options,
         // remoteEntryKey,
-        sharedRemoteEntryKey,
-        sharedName,
         eslintRelativeExtendPath,
     };
 
@@ -114,11 +112,9 @@ export async function generateProject(options: ProjectOptions) {
         }
     }
 
-    // if (options.createShared) {
-    //     const sharedPath = path.resolve(process.cwd(), config.sharedApp.name);
+    const middlewareOptions = await runMiddleware(MIDDLEWARE_STAGE.afterGenerate, { options });
 
-    //     await fs.copy(path.resolve(__dirname, '..', '..', '..', 'templates', 'shared'), sharedPath);
-    // }
+    Object.assign(options, middlewareOptions);
 
     outro(`✔️ Your '${options.name}' project is ready to go.
 
