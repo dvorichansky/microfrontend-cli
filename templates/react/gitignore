@@ -15,3 +15,9 @@ dist/
 .idea/
 .DS_Store
 Thumbs.db
+
+# Debug / temp
+debug.log
+tmp/
+temp/
+@mf-types

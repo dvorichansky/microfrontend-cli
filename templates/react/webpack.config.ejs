@@ -24,8 +24,7 @@ if (fs.existsSync(envFile)) {
 // Plugins
 const plugins = [
     new HtmlWebpackPlugin({
-        template: './index.html',
-        filename: 'index.html',
+        template: path.resolve(__dirname, 'index.html'),
         minify: !isDev,
     }),
     new ModuleFederationPlugin(mfConfig),
@@ -45,7 +44,7 @@ if (!isDev) {
 }
 
 module.exports = {
-    entry: './src/index.ts',
+    entry: path.resolve(__dirname, 'src', 'index.ts'),
     mode: currentEnv,
     devtool: isDev ? 'source-map' : false,
     output: {
@@ -95,4 +94,13 @@ module.exports = {
             open: true,
         },
     } : {}),
+    optimization: {
+        splitChunks: {
+            chunks: 'all',
+            cacheGroups: {
+                default: false,
+                vendors: false,
+            },
+        },
+    },
 };
