@@ -1,0 +1,56 @@
+{
+    "$schema": "http://json-schema.org/draft-07/schema#",
+    "title": "mf-cli.config.json schema",
+    "type": "object",
+    "properties": {
+        "appsDir": {
+            "type": "string",
+            "description": "Directory name where microfrontend apps are stored"
+        },
+        "defaultType": {
+            "type": "string",
+            "enum": ["microfrontend", "shell"],
+            "description": "Default type of generated project"
+        },
+        "defaultStructure": {
+            "type": "string",
+            "enum": ["standalone", "monorepo"],
+            "description": "Default structure of the project"
+        },
+        "defaultFramework": {
+            "type": "string",
+            "enum": ["react", "vue", "vanilla"],
+            "description": "Framework to be used by default"
+        },
+        "defaultStyleFramework": {
+            "type": "string",
+            "enum": ["tailwind", "bootstrap", "none"],
+            "description": "CSS framework to be included by default"
+        },
+        "eslintExtendPath": {
+            "type": "string",
+            "description": "Path to ESLint config to extend from"
+        },
+        "eslintTemplatePath": {
+            "type": "string",
+            "description": "Path to ESLint config template file"
+        },
+        "middleware": {
+            "type": "object",
+            "properties": {
+                "beforeGenerate": {
+                    "type": "array",
+                    "items": { "type": "string" },
+                    "description": "Scripts to run before generation"
+                },
+                "afterGenerate": {
+                    "type": "array",
+                    "items": { "type": "string" },
+                    "description": "Scripts to run after generation"
+                }
+            },
+            "additionalProperties": false
+        }
+    },
+    "additionalProperties": false
+}
