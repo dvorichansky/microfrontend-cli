@@ -5,7 +5,7 @@
     "properties": {
         "appsDir": {
             "type": "string",
-            "description": "Directory name where microfrontend apps are stored"
+            "description": "Directory name where microfrontend apps are stored (only used in 'monorepo' structure)"
         },
         "defaultType": {
             "type": "string",
