@@ -1,0 +1,11 @@
+<template>
+    <div class="<% if (styleFramework === 'tailwind') { %>text-3xl text-center mt-10<% } else { %>app<% } %>">
+        <h1>Hello from <%= name %></h1>
+    </div>
+</template>
+
+<script lang="ts">
+import { defineComponent } from 'vue';
+
+export default defineComponent({});
+</script>

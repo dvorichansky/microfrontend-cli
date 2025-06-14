@@ -1,46 +1,123 @@
 const path = require('path');
-const { withModuleFederation } = require('@module-federation/enhanced/webpack');
-const remotes = require('./remotes.config');
-require('dotenv').config({ path: '.env.development' });
+const fs = require('fs');
+const dotenv = require('dotenv');
+const HtmlWebpackPlugin = require('html-webpack-plugin');
+const MiniCssExtractPlugin = require('mini-css-extract-plugin');
+const webpack = require('webpack');
+const { ModuleFederationPlugin } = require('@module-federation/enhanced/webpack');
+const { VueLoaderPlugin } = require('vue-loader');
 
-module.exports = withModuleFederation({
-  name: '<%= name %>',
-  filename: 'remoteEntry.js',
-  exposes: {
-    './App': './src/App',
-  },
-  remotes,
-  shared: {
-    vue: { singleton: true, requiredVersion: false }
-  },
-  webpackConfig: {
-    entry: './src/main.ts',
-    mode: 'development',
-    devtool: 'source-map',
-    devServer: {
-      port: 3000,
-      historyApiFallback: true,
-      hot: true,
-      open: true
-    },
+const mfConfig = require('./modulefederation.config.js');
+
+// Environment
+const currentEnv = process.env.NODE_ENV || 'development';
+const isDev = currentEnv === "development";
+
+// .env
+const envFile = `.env.${currentEnv}`;
+
+if (fs.existsSync(envFile)) {
+    dotenv.config({ path: envFile });
+} else {
+    console.warn(`[webpack] ${envFile} not found. Using default environment variables.`);
+}
+
+// Plugins
+const plugins = [
+    new VueLoaderPlugin(),
+    new HtmlWebpackPlugin({
+        template: path.resolve(__dirname, 'index.html'),
+        minify: !isDev,
+    }),
+    new ModuleFederationPlugin(mfConfig),
+    new webpack.DefinePlugin({
+        'process.env.NODE_ENV': JSON.stringify(currentEnv),
+        'process.env.API_URL': JSON.stringify(process.env.API_URL),
+        __VUE_OPTIONS_API__: JSON.stringify(true),
+        __VUE_PROD_DEVTOOLS__: JSON.stringify(false),
+        __VUE_PROD_HYDRATION_MISMATCH_DETAILS__: JSON.stringify(false),
+    }),
+];
+
+// Production-only: MiniCssExtractPlugin
+if (!isDev) {
+    plugins.push(
+        new MiniCssExtractPlugin({
+            filename: '[name].[contenthash].css',
+        })
+    );
+}
+
+module.exports = {
+    entry: path.resolve(__dirname, 'src', 'index.ts'),
+    mode: currentEnv,
+    devtool: isDev ? 'source-map' : false,
     output: {
-      publicPath: 'auto'
+        path: path.resolve(__dirname, 'dist'),
+        filename: isDev ? '[name].js' : '[name].[contenthash].js',
+        publicPath: 'auto',
+        clean: true,
     },
     resolve: {
-      extensions: ['.ts', '.tsx', '.js', '.jsx']
+        extensions: ['.ts', '.js'],
     },
     module: {
-      rules: [
-        {
-          test: /\\.tsx?$/,
-          use: 'ts-loader',
-          exclude: /node_modules/
+        rules: [
+            {
+                test: /\.vue$/,
+                loader: 'vue-loader',
+                options: {
+                    experimentalInlineMatchResource: true,
+                },
+            },
+            {
+                test: /\.tsx?$/,
+                use: {
+                    loader: 'ts-loader',
+                    options: {
+                        appendTsSuffixTo: [/\.vue$/],
+                    },
+                },
+                exclude: /node_modules/,
+            },
+            {
+                test: /\.css$/,
+                use: [
+                    isDev ? 'style-loader' : MiniCssExtractPlugin.loader,
+                    'css-loader',
+<% if (styleFramework === 'tailwind') { -%>
+                    'postcss-loader',
+<% } -%>
+                ],
+            },
+<% if (useSass) { -%>
+            {
+                test: /\.s[ac]ss$/,
+                use: [
+                    isDev ? 'style-loader' : MiniCssExtractPlugin.loader,
+                    'css-loader',
+                    'sass-loader',
+                ],
+            },
+<% } -%>
+        ],
+    },
+    plugins,
+    ...(isDev ? {
+        devServer: {
+            port: Number(process.env.PORT) || 3000,
+            historyApiFallback: true,
+            hot: true,
+            open: true,
         },
-        {
-          test: /\\.css$/,
-          use: ['style-loader', 'css-loader']
-        }
-      ]
-    }
-  }
-});
+    } : {}),
+    optimization: {
+        splitChunks: {
+            chunks: 'all',
+            cacheGroups: {
+                default: false,
+                vendors: false,
+            },
+        },
+    },
+};

@@ -89,9 +89,18 @@ export async function promptForProjectOptions(commandOptions: ProjectCommandOpti
             options.name = commandOptions.name;
         } else {
             const namePrompts = {
-                [PROJECT_TYPE_KEYS.shell]: { message: 'Shell name:', placeholder: 'shell' },
-                [PROJECT_TYPE_KEYS.microfrontend]: { message: 'Microfrontend name:', placeholder: 'my-microfrontend' },
-                [PROJECT_TYPE_KEYS.shared]: { message: 'Shared remote name:', placeholder: 'shared' },
+                [PROJECT_TYPE_KEYS.shell]: {
+                    message: 'Shell name:',
+                    placeholder: 'shell',
+                },
+                [PROJECT_TYPE_KEYS.microfrontend]: {
+                    message: 'Microfrontend name:',
+                    placeholder: 'my-microfrontend',
+                },
+                [PROJECT_TYPE_KEYS.shared]: {
+                    message: 'Shared remote name:',
+                    placeholder: 'shared',
+                },
             };
             const namePrompt = namePrompts[options.type];
 
@@ -111,7 +120,7 @@ export async function promptForProjectOptions(commandOptions: ProjectCommandOpti
             break;
         }
 
-        console.log(`❌ A project with name '${options.name}' already exists. Please choose a different name.`);
+        console.log('❌ A project with name' + options.name + ' already exists. ' + 'Please choose a different name.');
         options.name = '';
         commandOptions.name = '';
     }
@@ -127,7 +136,10 @@ export async function promptForProjectOptions(commandOptions: ProjectCommandOpti
         if (projectsWithRemotes.length) {
             options.consumers = (await multiselect({
                 message: 'Connect this remote to which apps?',
-                options: projectsWithRemotes.map((name) => ({ value: name, label: name })),
+                options: projectsWithRemotes.map((name) => ({
+                    value: name,
+                    label: name,
+                })),
                 required: false,
             })) as ProjectConsumers;
             checkCancel(options.consumers);
@@ -158,7 +170,7 @@ export async function promptForProjectOptions(commandOptions: ProjectCommandOpti
 
     if (commandOptions.styleFramework) {
         if (!PROJECT_STYLE_FRAMEWORK_KEYS[commandOptions.styleFramework]) {
-            console.error(`Invalid style framework: ${commandOptions.styleFramework}`);
+            console.error('Invalid style framework:' + commandOptions.styleFramework);
             process.exit(1);
         }
 
@@ -206,7 +218,7 @@ export async function promptForProjectOptions(commandOptions: ProjectCommandOpti
             break;
         }
 
-        console.log(`❌ Port ${options.port} is already in use. Please choose a different port.`);
+        console.log('❌ Port ${options.port} is already in use. ' + 'Please choose a different port.');
         options.port = '';
         commandOptions.port = '';
     }

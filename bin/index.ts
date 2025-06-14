@@ -18,8 +18,6 @@ const program = new Command();
 program.name('mf-cli').description('CLI for scalable microfrontend architecture');
 
 program
-    // .command('create')
-    // .description('Create a shell or microfrontend')
     .option('-s, --structure <structure>', `Project structure (${Object.values(PROJECT_STRUCTURE_KEYS).join(', ')})`)
     .option('-t, --type <type>', `Project type (${Object.values(PROJECT_TYPE_KEYS).join(', ')})`)
     .option('-n, --name <name>', 'Project name')

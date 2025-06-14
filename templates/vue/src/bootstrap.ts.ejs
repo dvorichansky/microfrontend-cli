@@ -1,0 +1,17 @@
+import { createApp } from "vue";
+
+<% if (useSass) { -%>
+import './index.scss';
+<% } else { -%>
+import './index.css';
+<% } -%>
+
+<% if (type === 'shared') { -%>
+import Button from './Button.vue';
+
+createApp(Button).mount("#root");
+<% } else { -%>
+import App from "./App.vue";
+
+createApp(App).mount("#root");
+<% } -%>

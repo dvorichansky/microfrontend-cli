@@ -3,7 +3,12 @@ import path from 'path';
 import ejs from 'ejs';
 import { outro } from '@clack/prompts';
 
-import { PROJECT_STRUCTURE_KEYS, PROJECT_STYLE_FRAMEWORK_KEYS, PROJECT_TYPE_KEYS } from '../constants/project';
+import {
+    PROJECT_FRAMEWORK_KEYS,
+    PROJECT_STRUCTURE_KEYS,
+    PROJECT_STYLE_FRAMEWORK_KEYS,
+    PROJECT_TYPE_KEYS,
+} from '../constants/project';
 import { MIDDLEWARE_STAGE } from '../constants/middleware';
 import { getConfig } from '../helpers/config';
 import { updateRemotesConfig } from '../helpers/projects';
@@ -24,15 +29,12 @@ export async function generateProject(options: ProjectOptions) {
             ? path.resolve(process.cwd(), options.name)
             : path.resolve(process.cwd(), config.appsDir, options.name);
 
-    // const remoteEntryKey = `${options.name.toUpperCase().replace(/-/g, '_')}_REMOTE_URL`;
-
     const eslintRelativeExtendPath = config.eslintExtendPath
         ? path.relative(targetDir, path.resolve(process.cwd(), config.eslintExtendPath)).replace(/\\/g, '/')
         : null;
 
     const context = {
         ...options,
-        // remoteEntryKey,
         eslintRelativeExtendPath,
     };
 
@@ -57,14 +59,18 @@ export async function generateProject(options: ProjectOptions) {
         render('modulefederation.config.ejs', 'modulefederation.config.js'),
         render('package.json.ejs', 'package.json'),
         render('index.html.ejs', 'index.html'),
-        render('src/bootstrap.tsx.ejs', 'src/bootstrap.tsx'),
-
         render(
             `src/${options.useSass ? 'index.scss.ejs' : 'index.css.ejs'}`,
             `src/${options.useSass ? 'index.scss' : 'index.css'}`,
         ),
         render('.env.development.ejs', '.env.development'),
     ]);
+
+    if (options.framework === PROJECT_FRAMEWORK_KEYS.react) {
+        await render('src/bootstrap.tsx.ejs', 'src/bootstrap.tsx');
+    } else if (options.framework === PROJECT_FRAMEWORK_KEYS.vue) {
+        await render('src/bootstrap.ts.ejs', 'src/bootstrap.ts');
+    }
 
     if (options.type === PROJECT_TYPE_KEYS.microfrontend || options.type === PROJECT_TYPE_KEYS.shell) {
         const remotesPath = tpl('remotes.config.js');
@@ -73,10 +79,20 @@ export async function generateProject(options: ProjectOptions) {
         }
     }
 
-    if (options.type === PROJECT_TYPE_KEYS.shared) {
-        await render('src/Button.tsx.ejs', 'src/Button.tsx');
-    } else {
-        await render('src/App.tsx.ejs', 'src/App.tsx');
+    if (options.framework === PROJECT_FRAMEWORK_KEYS.react) {
+        if (options.type === PROJECT_TYPE_KEYS.shared) {
+            await render('src/Button.tsx.ejs', 'src/Button.tsx');
+        } else {
+            await render('src/App.tsx.ejs', 'src/App.tsx');
+        }
+    } else if (options.framework === PROJECT_FRAMEWORK_KEYS.vue) {
+        if (options.type === PROJECT_TYPE_KEYS.shared) {
+            await render('src/Button.vue.ejs', 'src/Button.vue');
+            await render('src/Button.ejs', 'src/Button.ts');
+        } else {
+            await render('src/App.vue.ejs', 'src/App.vue');
+            await render('src/App.ejs', 'src/App.ts');
+        }
     }
 
     const gitignorePath = tpl('gitignore');

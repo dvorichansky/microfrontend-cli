@@ -20,19 +20,9 @@ module.exports = {
 <% } -%>
     shared: {
         ...dependencies,
-        react: {
+        vue: {
             singleton: true,
-            requiredVersion: dependencies['react'],
+            requiredVersion: dependencies['vue'],
         },
-        'react-dom': {
-            singleton: true,
-            requiredVersion: dependencies['react-dom'],
-        },
-<% if (styleFramework === 'bootstrap') { -%>
-        'react-bootstrap': {
-            singleton: true,
-            requiredVersion: dependencies['react-bootstrap'],
-        },
-<% } -%>
     },
 };
