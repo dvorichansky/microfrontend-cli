@@ -1,0 +1,7 @@
+export const getElement = () => {
+    return `
+<div class="<% if (styleFramework === 'tailwind') { %>text-3xl text-center mt-10<% } else { %>app<% } %>">
+    <h1>Name: <%= name %></h1>
+</div>
+`;
+};

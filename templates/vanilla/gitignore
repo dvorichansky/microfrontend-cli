@@ -1,0 +1,23 @@
+# node modules and build artifacts
+node_modules/
+dist/
+*.log
+
+# TypeScript
+*.tsbuildinfo
+
+# dotenv files (except development)
+.env
+!.env.development
+
+# Editor / system
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Debug / temp
+debug.log
+tmp/
+temp/
+@mf-types

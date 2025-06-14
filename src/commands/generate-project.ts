@@ -68,7 +68,10 @@ export async function generateProject(options: ProjectOptions) {
 
     if (options.framework === PROJECT_FRAMEWORK_KEYS.react) {
         await render('src/bootstrap.tsx.ejs', 'src/bootstrap.tsx');
-    } else if (options.framework === PROJECT_FRAMEWORK_KEYS.vue) {
+    } else if (
+        options.framework === PROJECT_FRAMEWORK_KEYS.vue ||
+        options.framework === PROJECT_FRAMEWORK_KEYS.vanilla
+    ) {
         await render('src/bootstrap.ts.ejs', 'src/bootstrap.ts');
     }
 
@@ -93,6 +96,8 @@ export async function generateProject(options: ProjectOptions) {
             await render('src/App.vue.ejs', 'src/App.vue');
             await render('src/App.ejs', 'src/App.ts');
         }
+    } else if (options.framework === PROJECT_FRAMEWORK_KEYS.vanilla) {
+        await render('src/elements.ejs', 'src/elements.ts');
     }
 
     const gitignorePath = tpl('gitignore');

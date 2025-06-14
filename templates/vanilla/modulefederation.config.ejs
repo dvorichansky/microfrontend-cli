@@ -1,0 +1,24 @@
+const { dependencies } = require('./package.json');
+<% if (type === 'shell' || type === 'microfrontend') { -%>
+const remotes = require('./remotes.config.js');
+<% } -%>
+
+module.exports = {
+    name: '<%= name %>',
+<% if (type === 'microfrontend' || type === 'shared') { -%>
+    exposes: {
+        './elements': './src/elements.ts',
+    },
+    filename: 'remoteEntry.js',
+<% } -%>
+<% if (type === 'shell' || type === 'microfrontend') { -%>
+    remotes,
+<% } -%>
+    shared: {
+        ...dependencies,
+        vue: {
+            singleton: true,
+            requiredVersion: dependencies['vue'],
+        },
+    },
+};

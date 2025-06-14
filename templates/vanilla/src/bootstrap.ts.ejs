@@ -1,0 +1,13 @@
+import { getElement } from './elements';
+
+<% if (useSass) { -%>
+import './index.scss';
+<% } else { -%>
+import './index.css';
+<% } -%>
+
+const root = document.getElementById('root');
+
+if (root) {
+    root.innerHTML = getElement();
+}
