@@ -14,6 +14,9 @@
     },
     "devDependencies": {
         "@module-federation/enhanced": "^0.12.0",
+<% if (styleFramework === 'tailwind') { -%>
+        "@tailwindcss/postcss": "^4.1.10",
+<% } -%>
         "@types/react": "^19.1.2",
         "@types/react-dom": "^19.1.2",
         "autoprefixer": "^10.4.21",

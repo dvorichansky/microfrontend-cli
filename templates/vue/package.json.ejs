@@ -12,6 +12,9 @@
     },
     "devDependencies": {
         "@module-federation/enhanced": "^0.12.0",
+<% if (styleFramework === 'tailwind') { -%>
+        "@tailwindcss/postcss": "^4.1.10",
+<% } -%>
 <% if (includeESLint) { -%>
         "@typescript-eslint/eslint-plugin": "^8.33.1",
         "@typescript-eslint/parser": "^8.33.1",
