@@ -7,8 +7,6 @@ const webpack = require('webpack');
 const { ModuleFederationPlugin } = require('@module-federation/enhanced/webpack');
 const { VueLoaderPlugin } = require('vue-loader');
 
-const mfConfig = require('./modulefederation.config.js');
-
 // Environment
 const currentEnv = process.env.NODE_ENV || 'development';
 const isDev = currentEnv === "development";
@@ -21,6 +19,8 @@ if (fs.existsSync(envFile)) {
 } else {
     console.warn(`[webpack] ${envFile} not found. Using default environment variables.`);
 }
+
+const mfConfig = require('./modulefederation.config.js');
 
 // Plugins
 const plugins = [
